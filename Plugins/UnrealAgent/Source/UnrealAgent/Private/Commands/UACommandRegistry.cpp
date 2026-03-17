@@ -16,11 +16,15 @@
 #include "Commands/UAAssetManageCommands.h"
 #include "Commands/UAScreenshotCommands.h"
 #include "Commands/UAEventCommands.h"
+// Phase 3: migrated from SmartUEAssistant
+#include "Commands/UABatchOperationCommands.h"
+#include "Commands/UASceneAnalysisCommands.h"
+#include "Commands/UAUniversalModifyCommand.h"
 #include "UnrealAgent.h"
 
 UACommandRegistry::UACommandRegistry()
 {
-	// Register all command groups
+	// Original UnrealAgent tools (50 tools)
 	RegisterCommand(MakeShared<UAProjectCommands>());
 	RegisterCommand(MakeShared<UAAssetCommands>());
 	RegisterCommand(MakeShared<UAWorldCommands>());
@@ -35,24 +39,20 @@ UACommandRegistry::UACommandRegistry()
 	RegisterCommand(MakeShared<UAAssetManageCommands>());
 	RegisterCommand(MakeShared<UAScreenshotCommands>());
 	RegisterCommand(MakeShared<UAEventCommands>());
+	// Phase 3: batch ops (7), scene analysis (5), universal modify (1)
+	RegisterCommand(MakeShared<UABatchOperationCommands>());
+	RegisterCommand(MakeShared<UASceneAnalysisCommands>());
+	RegisterCommand(MakeShared<UAUniversalModifyCommand>());
 }
 
 void UACommandRegistry::RegisterCommand(TSharedPtr<UACommandBase> Command)
 {
-	if (!Command.IsValid())
-	{
-		return;
-	}
-
+	if (!Command.IsValid()) return;
 	CommandGroups.Add(Command);
-
-	TArray<FString> Methods = Command->GetSupportedMethods();
-	for (const FString& Method : Methods)
+	for (const FString& Method : Command->GetSupportedMethods())
 	{
 		if (MethodMap.Contains(Method))
-		{
-			UE_LOG(LogUnrealAgent, Warning, TEXT("Method '%s' is already registered, overwriting"), *Method);
-		}
+			UE_LOG(LogUnrealAgent, Warning, TEXT("Method '%s' already registered, overwriting"), *Method);
 		MethodMap.Add(Method, Command);
 		UE_LOG(LogUnrealAgent, Log, TEXT("Registered method: %s"), *Method);
 	}
@@ -70,49 +70,31 @@ bool UACommandRegistry::Dispatch(
 		OutError = FString::Printf(TEXT("Unknown method: %s"), *MethodName);
 		return false;
 	}
-
 	return (*CommandPtr)->Execute(MethodName, Params, OutResult, OutError);
 }
 
 TArray<TSharedPtr<FJsonObject>> UACommandRegistry::GetAllToolSchemas() const
 {
 	TArray<TSharedPtr<FJsonObject>> Schemas;
-
-	for (const auto& CommandGroup : CommandGroups)
+	for (const auto& CG : CommandGroups)
 	{
-		if (!CommandGroup.IsValid())
+		if (!CG.IsValid()) continue;
+		for (const FString& Method : CG->GetSupportedMethods())
 		{
-			continue;
-		}
-
-		TArray<FString> Methods = CommandGroup->GetSupportedMethods();
-		for (const FString& Method : Methods)
-		{
-			TSharedPtr<FJsonObject> Schema = CommandGroup->GetToolSchema(Method);
-			if (Schema.IsValid())
-			{
-				Schemas.Add(Schema);
-			}
+			TSharedPtr<FJsonObject> Schema = CG->GetToolSchema(Method);
+			if (Schema.IsValid()) Schemas.Add(Schema);
 		}
 	}
-
 	return Schemas;
 }
 
 TSharedPtr<FJsonObject> UACommandRegistry::HandleListTools()
 {
 	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
-
 	TArray<TSharedPtr<FJsonValue>> ToolsArray;
-	TArray<TSharedPtr<FJsonObject>> Schemas = GetAllToolSchemas();
-
-	for (const auto& Schema : Schemas)
-	{
+	for (const auto& Schema : GetAllToolSchemas())
 		ToolsArray.Add(MakeShared<FJsonValueObject>(Schema));
-	}
-
 	Result->SetArrayField(TEXT("tools"), ToolsArray);
 	Result->SetNumberField(TEXT("count"), ToolsArray.Num());
-
 	return Result;
 }

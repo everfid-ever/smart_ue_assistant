@@ -58,3 +58,9 @@ async def list_properties(actor_name: str, component_name: str = "") -> dict:
     if component_name:
         params["component_name"] = component_name
     return await connection.send_request("list_properties", params)
+
+
+@mcp.tool()
+async def modify_property(target: str, property_name: str, value) -> dict:
+    "`語義化修改任意 Actor 的属性。target: 選中Actor描述, property_name: UE属性名, value: 新值"
+    return await connection.send_request('modify_property', {'Target': target, 'PropertyName': property_name, 'Value': value})
