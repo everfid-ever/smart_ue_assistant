@@ -2,9 +2,9 @@
 
 # Unreal Engine paths
 unreal_engine:
-  engine_path: ~/Documents/ue_56/Engine
-  source_path: ~/Documents/ue_56/Engine/Source
-  docs_path: ~/Documents/ue_56/Engine/Documentation
+  engine_path: D:/Epic Games/UE_5.7/Engine
+  source_path: D:/Epic Games/UE_5.7/Engine/Source
+  docs_path: D:/Epic Games/UE_5.7/Engine/Documentation
 
 # Document collection settings
 collection:
@@ -75,3 +75,4 @@ agents:
       - api-reference
       - guides
     temperature: 0.3
+

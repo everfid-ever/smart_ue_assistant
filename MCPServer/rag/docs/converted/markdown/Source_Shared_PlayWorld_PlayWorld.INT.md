@@ -1,0 +1,15 @@
+# PlayWorld Tool Tips
+
+<!-- Document metadata -->
+<!-- Availability: NoPublish -->
+<!-- Source: Source_Shared_PlayWorld_PlayWorld.INT.udn -->
+
+## Content
+
+### Simulate
+
+This will start a Simulate In Editor (SIE) session, in which gameplay takes place without the player. During simulation, physics, Blueprints, C++ code, and animations are all active. The player pawn is not possessed, so no gameplay input can be entered. Editor tools remain accessible during simulation, so Actors can be added and changed.
+
+### RepeatLastPlay
+
+This will start a Play In Editor (PIE) session, so that gameplay can be tested directly from the editor.  Different modes and options for Play In Editor sessions can be selected in the dropdown menu, and the Play In button will use the same settings that were selected for the previous session.

@@ -1,0 +1,23 @@
+# Common Tabs
+
+<!-- Document metadata -->
+<!-- Availability: Docs -->
+<!-- Source: Source_Shared_Editors_Common_EditorTabs_EditorTabs.INT.udn -->
+
+## Overview
+
+Descriptions of tabs in the editor
+
+## Content
+
+### MyBlueprint
+
+The MyBlueprint tab is used to manage all the different elements of your Blueprint. It is broken into sections for Graphs, Functions, Macros, Variables and Event Dispatchers. Double-clicking on a Graph, Function, or Macro will open it for editing in a new tab. You can use the 'Add' buttons at the top to create new elements for your Blueprint. Graphs show all the Event nodes within them as well. Variables can be dragged around in the list to change their order and category. You can also drag Functions, Macros, Variables, and Event Dispatchers into a graph to add a node using them.
+
+### PaletteList
+
+The Palette gives you a list of all possible nodes that can be searched. It also gives you the ability to manage 'Favorites'.
+
+### Inspector
+
+The Details tab lets you see and edit properties of your selection. This could be nodes on the graph, Components in the 3D viewport (Components mode), or Variables/Functions etc. in the My Blueprint tab.

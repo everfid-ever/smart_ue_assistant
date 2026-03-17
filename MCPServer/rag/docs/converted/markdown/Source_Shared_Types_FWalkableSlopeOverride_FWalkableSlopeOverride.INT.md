@@ -1,0 +1,17 @@
+# FWalkableSlopeOverride RTTs
+
+<!-- Document metadata -->
+<!-- Availability: NoPublish -->
+<!-- Source: Source_Shared_Types_FWalkableSlopeOverride_FWalkableSlopeOverride.INT.udn -->
+
+## Content
+
+### WalkableSlopeBehavior
+
+Determines how the Walkable Slope Angle operates on the existing walkable angle, whether it increases or decreases it.
+
+### WalkableSlopeAngle
+
+The value which operates on the existing walkable angle, modifying it by the method set by the Walkable Slope Behaviour.
+If increasing walkable slope, this can only increase walkability, never restricting the character to lower slopes than usual.
+If decreasing walkable slope, this can only decrease walkability, never enabling the character to traverse steeper slopes than usual.
