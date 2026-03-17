@@ -594,13 +594,10 @@ TSharedPtr<FJsonValue> UAPropertyCommands::PropertyToJsonValue(FProperty* Proper
 	{
 		if (NumProp->IsFloatingPoint())
 		{
-			double Val = 0.0;
-			NumProp->GetValue_InContainer(ValuePtr, &Val);
-			// 使用 ExportText 更可靠
 			FString ValStr;
-			Property->ExportText_Direct(ValStr, ValuePtr, nullptr, nullptr, PPF_None);
-			double ParsedVal = FCString::Atod(*ValStr);
-			return MakeShared<FJsonValueNumber>(ParsedVal);
+            Property->ExportText_Direct(ValStr, ValuePtr, nullptr, nullptr, PPF_None);
+            double ParsedVal = FCString::Atod(*ValStr);
+            return MakeShared<FJsonValueNumber>(ParsedVal);
 		}
 		else if (NumProp->IsInteger())
 		{

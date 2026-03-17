@@ -100,7 +100,8 @@ bool UABatchOperationCommands::BatchRenameActors(
 	FString Prefix      = Params->HasField(TEXT("Prefix"))      ? Params->GetStringField(TEXT("Prefix"))      : TEXT("");
 	FString Suffix      = Params->HasField(TEXT("Suffix"))      ? Params->GetStringField(TEXT("Suffix"))      : TEXT("");
 	FString RemovePrefix= Params->HasField(TEXT("RemovePrefix"))? Params->GetStringField(TEXT("RemovePrefix")): TEXT("");
-	int32 StartIndex    = Params->HasField(TEXT("StartIndex"))  ? (int32)Params->GetNumberField(TEXT("StartIndex")) : 0;
+	bool bUseIndex  = Params->HasField(TEXT("StartIndex"));
+	int32 StartIndex = bUseIndex ? (int32)Params->GetNumberField(TEXT("StartIndex")) : 0;
 
 	int32 Count = 0;
 	int32 Idx = StartIndex;
@@ -112,7 +113,7 @@ bool UABatchOperationCommands::BatchRenameActors(
 
 		FString Final;
 		if (!Prefix.IsEmpty()) Final += Prefix;
-		if (StartIndex >= 0)
+		if (bUseIndex)
 		{
 			Final += FString::Printf(TEXT("%s%d"), !Prefix.IsEmpty() ? TEXT("_") : TEXT(""), Idx++);
 			if (!Name.IsEmpty()) Final += TEXT("_") + Name;

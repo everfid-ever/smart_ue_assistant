@@ -42,3 +42,5 @@ async def editor_state_resource() -> str:
         return json.dumps(result, indent=2)
     except Exception as e:
         return f"Error: {e}"
+
+from .tools import batch_ops, scene_analysis, properties  # noqa: F401

@@ -1,3 +1,4 @@
+
 """Batch operation tools - migrated from SmartUEAssistant BatchOperationTools."""
 
 from ..server import mcp, connection
@@ -5,16 +6,19 @@ from ..server import mcp, connection
 
 @mcp.tool()
 async def batch_rename_actors(
-    prefix: str = "",
-    suffix: str = "",
-    start_index: int = 0,
-    remove_prefix: str = "",
+        prefix: str = "",
+        suffix: str = "",
+        start_index: int | None = None,    # 改为 Optional
+        remove_prefix: str = "",
 ) -> dict:
-    """批量重命名当前选中的 Actor。"""
-    return await connection.send_request("batch_rename_actors", {
-        "Prefix": prefix, "Suffix": suffix,
-        "StartIndex": start_index, "RemovePrefix": remove_prefix,
-    })
+    params = {
+        "Prefix": prefix,
+        "Suffix": suffix,
+        "RemovePrefix": remove_prefix,
+    }
+    if start_index is not None:        # 只有明确传了才加
+        params["StartIndex"] = start_index
+    return await connection.send_request("batch_rename_actors", params)
 
 
 @mcp.tool()
@@ -52,11 +56,15 @@ async def align_to_ground(align_rotation: bool = False, offset: float = 0.0) -> 
 
 
 @mcp.tool()
-async def distribute_actors(pattern: str, spacing: float, columns: int = 5, radius: float = 0.0) -> dict:
-    """按模式分布选中 Actor：Line / Grid / Circle / Random。"""
+async def distribute_actors(
+        pattern: str,
+        spacing: float,
+        columns: int = 5,
+        radius: float | None = None,    # None = 让 C++ 自动按 spacing 计算
+) -> dict:
     params = {"Pattern": pattern, "Spacing": spacing}
     if pattern.lower() == "grid":
         params["Columns"] = columns
-    elif pattern.lower() == "circle" and radius > 0:
+    elif pattern.lower() == "circle" and radius is not None:
         params["Radius"] = radius
     return await connection.send_request("distribute_actors", params)

@@ -111,17 +111,6 @@ TArray<AActor*> UAUniversalModifyCommand::FindTargetActors(const FString& Target
 		return Results;
 	}
 
-	// Static mesh actors by name
-	if (T.Contains(TEXT("cube")) || T.Contains(TEXT("sphere")) || T.Contains(TEXT("mesh")) || T.Contains(TEXT("plane")))
-	{
-		for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
-		{
-			FString Name = (*It)->GetName().ToLower();
-			if (Name.Contains(T) || T.Contains(Name)) Results.Add(*It);
-		}
-		return Results;
-	}
-
 	// General name search
 	for (TActorIterator<AActor> It(World); It; ++It)
 	{
@@ -151,6 +140,7 @@ bool UAUniversalModifyCommand::ModifyActorProperty(
 				FLinearColor Color;
 				if (FUAPropertyModificationHelper::ParseColor(Value, Color))
 				{
+					FScopedTransaction Transaction(NSLOCTEXT("UnrealAgent", "ModifyProperty", "Modify Property"));
 					LC->Modify();
 					LC->SetLightColor(Color);
 					LC->MarkRenderStateDirty();
@@ -162,6 +152,7 @@ bool UAUniversalModifyCommand::ModifyActorProperty(
 			else if (PropertyPath.Equals(TEXT("Intensity"), ESearchCase::IgnoreCase) &&
 			         Value->Type == EJson::Number)
 			{
+				FScopedTransaction Transaction(NSLOCTEXT("UnrealAgent", "ModifyProperty", "Modify Property"));
 				LC->Modify();
 				LC->SetIntensity((float)Value->AsNumber());
 				LC->MarkRenderStateDirty();
@@ -174,5 +165,5 @@ bool UAUniversalModifyCommand::ModifyActorProperty(
 
 	// General reflection path
 	return FUAPropertyModificationHelper::SetPropertyValue(
-		Actor, PropertyPath, Value, false, TEXT("Modify Property"), OutError);
+		Actor, PropertyPath, Value, true, TEXT("Modify Property"), OutError);
 }

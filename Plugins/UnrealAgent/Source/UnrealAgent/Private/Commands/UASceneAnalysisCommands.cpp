@@ -72,7 +72,7 @@ bool UASceneAnalysisCommands::AnalyzeLevelStats(
 	for (TActorIterator<AActor> It(World); It; ++It)
 	{
 		AActor* Actor = *It;
-		if (!Actor || Actor->IsPendingKillPending()) continue;
+		if (!IsValid(Actor)) continue;
 		Total++;
 		ActorCounts.FindOrAdd(Actor->GetClass()->GetName())++;
 		if (USceneComponent* R = Actor->GetRootComponent())
@@ -88,9 +88,12 @@ bool UASceneAnalysisCommands::AnalyzeLevelStats(
 		if (AStaticMeshActor* SMA = Cast<AStaticMeshActor>(Actor))
 			if (UStaticMeshComponent* MC = SMA->GetStaticMeshComponent())
 				if (UStaticMesh* SM = MC->GetStaticMesh())
-					if (SM->GetRenderData())
-						for (const FStaticMeshLODResources& LOD : SM->GetRenderData()->LODResources)
-						{ TotalVerts += LOD.GetNumVertices(); TotalTris += LOD.GetNumTriangles(); }
+					if (SM->GetRenderData() && SM->GetRenderData()->LODResources.Num() > 0)
+					{
+						const FStaticMeshLODResources& LOD0 = SM->GetRenderData()->LODResources[0];
+						TotalVerts += LOD0.GetNumVertices();
+						TotalTris  += LOD0.GetNumTriangles();
+					}
 	}
 
 	ActorCounts.ValueSort([](int32 A, int32 B){ return A > B; });
@@ -125,7 +128,7 @@ bool UASceneAnalysisCommands::FindMissingReferences(
 	for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
 	{
 		AStaticMeshActor* A = *It;
-		if (!A || A->IsPendingKillPending()) continue;
+		if (!IsValid(A)) continue;
 		UStaticMeshComponent* MC = A->GetStaticMeshComponent();
 		if (!MC) continue;
 		bool bMissing = !MC->GetStaticMesh();
@@ -158,7 +161,7 @@ bool UASceneAnalysisCommands::FindDuplicateNames(
 
 	TMap<FString, int32> NameCount;
 	for (TActorIterator<AActor> It(World); It; ++It)
-		if (*It && !(*It)->IsPendingKillPending())
+		if (IsValid(*It))
 			NameCount.FindOrAdd((*It)->GetActorLabel())++;
 
 	TArray<FString> Dupes;
@@ -193,14 +196,14 @@ bool UASceneAnalysisCommands::FindOversizedMeshes(
 	for (TActorIterator<AStaticMeshActor> It(World); It; ++It)
 	{
 		AStaticMeshActor* A = *It;
-		if (!A || A->IsPendingKillPending()) continue;
+		if (!IsValid(A)) continue;
 		if (UStaticMeshComponent* MC = A->GetStaticMeshComponent())
 			if (UStaticMesh* SM = MC->GetStaticMesh())
 				if (SM->GetRenderData())
 				{
 					int64 Verts = 0;
-					for (const FStaticMeshLODResources& LOD : SM->GetRenderData()->LODResources)
-						Verts += LOD.GetNumVertices();
+					if (SM->GetRenderData()->LODResources.Num() > 0)
+						Verts = SM->GetRenderData()->LODResources[0].GetNumVertices();
 					if (Verts > Threshold)
 						Found.Add(FString::Printf(TEXT("%s: %lld verts (%s)"), *A->GetActorLabel(), Verts, *SM->GetName()));
 				}
@@ -233,7 +236,7 @@ bool UASceneAnalysisCommands::ValidateLevel(
 	for (TActorIterator<AActor> It(World); It; ++It)
 	{
 		AActor* Actor = *It;
-		if (!Actor || Actor->IsPendingKillPending()) continue;
+		if (!IsValid(Actor)) continue;
 		Checked++;
 
 		if (AStaticMeshActor* SMA = Cast<AStaticMeshActor>(Actor))
@@ -250,7 +253,7 @@ bool UASceneAnalysisCommands::ValidateLevel(
 
 		if (ALight* LA = Cast<ALight>(Actor))
 			if (ULightComponent* LC = LA->GetLightComponent())
-				if (!LC->CastShadows)
+				if (!LC->CastShadow)
 					Issues.Add(FString::Printf(TEXT("[No Shadows] %s"), *Actor->GetActorLabel()));
 
 		FVector Loc = Actor->GetActorLocation();

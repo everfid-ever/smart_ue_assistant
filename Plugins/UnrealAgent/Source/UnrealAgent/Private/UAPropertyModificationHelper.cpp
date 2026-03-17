@@ -253,10 +253,10 @@ bool FUAPropertyModificationHelper::SetPropertyValue(
 		return false;
 	}
 
-	FScopedTransaction* Transaction = nullptr;
+	TOptional<FScopedTransaction> Transaction;
 	if (bCreateTransaction)
 	{
-		Transaction = new FScopedTransaction(FText::FromString(TransactionDescription));
+		Transaction.Emplace(FText::FromString(TransactionDescription));
 	}
 
 	Container->Modify();
@@ -272,12 +272,11 @@ bool FUAPropertyModificationHelper::SetPropertyValue(
 		if (USceneComponent* SceneComp = Cast<USceneComponent>(Container))
 			SceneComp->UpdateComponentToWorld();
 	}
-	else
+	else if (Transaction.IsSet())
 	{
-		if (Transaction) Transaction->Cancel();
+		Transaction->Cancel();
 	}
 
-	delete Transaction;
 	return bSuccess;
 }
 

@@ -61,6 +61,20 @@ async def list_properties(actor_name: str, component_name: str = "") -> dict:
 
 
 @mcp.tool()
-async def modify_property(target: str, property_name: str, value) -> dict:
-    "`語義化修改任意 Actor 的属性。target: 選中Actor描述, property_name: UE属性名, value: 新值"
-    return await connection.send_request('modify_property', {'Target': target, 'PropertyName': property_name, 'Value': value})
+@mcp.tool()
+async def modify_property(
+        target: str,
+        property_name: str,
+        value: str | int | float | bool | dict,
+) -> dict:
+    """语义化修改任意 Actor 的属性。
+
+    Args:
+        target: 目标描述，如 'selected'、'Light'、'Cube_3'。
+        property_name: UE 属性名，如 'Intensity'、'LightColor'、'RelativeLocation'。
+        value: 新值。数值/布尔/字符串颜色名/{"X":1,"Y":2,"Z":3} 结构体。
+    """
+    return await connection.send_request(
+        "modify_property",
+        {"Target": target, "PropertyName": property_name, "Value": value},
+    )
