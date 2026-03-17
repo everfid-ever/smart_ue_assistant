@@ -93,3 +93,5 @@ env/
 # 测试临时文件
 MCPServer/test_rag.py
 MCPServer/rag/docs/raw/
+
+.idea/

@@ -3,13 +3,7 @@
     "EngineAssociation": "5.7",
     "Category": "",
     "Description": "",
-    "Modules": [
-        {
-            "Name": "SmartUEAssistant",
-            "Type": "Editor",
-            "LoadingPhase": "Default"
-        }
-    ],
+    "Modules": [],
     "Plugins": [
         {
             "Name": "ModelingToolsEditorMode",
