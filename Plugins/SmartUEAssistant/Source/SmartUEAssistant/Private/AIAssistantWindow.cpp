@@ -94,15 +94,6 @@ void SAIAssistantWindow::Construct(const FArguments& InArgs)
         .ToolTipText(LOCTEXT("ClearTip", "清空输入"))
         .ButtonStyle(&FSmartUEAssistantStyle::Get().GetWidgetStyle<FButtonStyle>(FSmartUEAssistantStyle::NAME_ModernIconButton));
 
-    SwitchModelButton = SNew(SButton)
-        .OnClicked(this, &SAIAssistantWindow::OnSwitchModelClicked)
-        .ToolTipText(LOCTEXT("ModelTip", "切换模型"))
-        .ButtonStyle(&FSmartUEAssistantStyle::Get().GetWidgetStyle<FButtonStyle>(FSmartUEAssistantStyle::NAME_ModernButton))
-        [
-            SAssignNew(SwitchModelLabel, STextBlock)
-            .Text(FText::FromString(GetCurrentModelLabel()))
-        ];
-
     // 新布局：顶部标题栏 + 内容区（滚动）+ 输入区
     ChildSlot
     [
@@ -293,46 +284,6 @@ FReply SAIAssistantWindow::OnSendMessage()
         FSlateApplication::Get().SetKeyboardFocus(InputTextBox, EFocusCause::SetDirectly);
     }
 
-    // 进入发送流程前：若存在待确认计划，根据设置处理“空回车即确认/关键词确认/取消”
-    {
-        USmartUEAssistantSettings* Settings = GetMutableDefault<USmartUEAssistantSettings>();
-        const bool bAcceptEnabled = Settings ? Settings->bEnterAcceptsPending : true;
-        const bool bServicePending = FAIService::Get().HasPendingConfirmation();
-        if (bServicePending && bAcceptEnabled)
-        {
-            auto ParseCSV = [](const FString& Csv) {
-                TArray<FString> Out; Csv.ParseIntoArray(Out, TEXT(","), true);
-                for (FString& S : Out) { S.TrimStartAndEndInline(); }
-                return Out;
-            };
-            const TArray<FString> Accepts = Settings ? ParseCSV(Settings->ConfirmAcceptKeywords) : TArray<FString>{ TEXT("确认"), TEXT("执行"), TEXT("同意"), TEXT("继续"), TEXT("ok"), TEXT("yes") };
-            const TArray<FString> Cancels = Settings ? ParseCSV(Settings->ConfirmCancelKeywords) : TArray<FString>{ TEXT("取消"), TEXT("放弃"), TEXT("中止"), TEXT("no") };
-
-            FString Trimmed = UserInput; Trimmed.TrimStartAndEndInline();
-            const auto InList = [](const FString& S, const TArray<FString>& L){ for (const FString& X : L) { if (S.Equals(X, ESearchCase::IgnoreCase)) return true; } return false; };
-
-            if (Trimmed.IsEmpty() || InList(Trimmed, Accepts))
-            {
-                // 用户确认执行（空输入或同意关键词）
-                AddMessageToChat(Trimmed.IsEmpty() ? TEXT("你: （确认执行）") : FString::Printf(TEXT("你: %s"), *Trimmed), true);
-                CancelStreaming();
-                FAIService::Get().ConfirmPendingPlan(FOnAIMessageReceived::CreateSP(SharedThis(this), &SAIAssistantWindow::OnAIResponseReceived));
-                bHasPendingConfirm = false;
-                bRequestInFlight = true;
-                UpdateRequestUI();
-                return FReply::Handled();
-            }
-            if (InList(Trimmed, Cancels))
-            {
-                AddMessageToChat(FString::Printf(TEXT("你: %s"), *Trimmed), true);
-                FAIService::Get().CancelPendingPlan();
-                OnAIResponseReceived(TEXT("已取消待执行的操作。"));
-                bHasPendingConfirm = false;
-                return FReply::Handled();
-            }
-        }
-    }
-
     FString Error;
     if (!ValidateUserInput(UserInput, Error))
     {
@@ -351,25 +302,13 @@ FReply SAIAssistantWindow::OnSendMessage()
     LastSentUserMessage = UserInput;    // 自动重试复用
     bHasPendingConfirm = false; // 进入新一轮会话，清除本地待确认标记，具体由AI响应时更新
 
-    // 加载设置（保留），但根据需求默认直接执行工具（不经过确认，不预览）
-    USmartUEAssistantSettings* Settings = GetMutableDefault<USmartUEAssistantSettings>();
-    const bool bAutoExecuteSafeTools = Settings ? Settings->bAutoExecuteSafeTools : true;
-
-    // 调用服务
-    const bool bEnableTools = true;
-    const bool bDryRun = !bAutoExecuteSafeTools; // 关闭自动执行时，先预览
-    const bool bUserConfirmed = false;           // 首次发送不视为已确认
-
-    // 标记进行中并刷新UI
+    // Phase 4：直接调用 HTTP 转发，工具调用由 Python 层处理
     bRequestInFlight = true;
     UpdateRequestUI();
 
-    FAIService::Get().SendMessageWithTools(
+    FAIService::Get().SendMessage(
         UserInput,
-        FOnAIMessageReceived::CreateSP(SharedThis(this), &SAIAssistantWindow::OnAIResponseReceived),
-        /*bEnableTools*/ bEnableTools,
-        /*bDryRun*/ bDryRun,
-        /*bUserConfirmed*/ bUserConfirmed
+        FOnAIMessageReceived::CreateSP(SharedThis(this), &SAIAssistantWindow::OnAIResponseReceived)
     );
 
     return FReply::Handled();
@@ -681,13 +620,6 @@ void SAIAssistantWindow::AddMessageToChat(const FString& Message, bool bIsUser)
 
 FReply SAIAssistantWindow::OnConfirmExecute()
 {
-    if (FAIService::Get().HasPendingConfirmation())
-    {
-        FAIService::Get().ConfirmPendingPlan(FOnAIMessageReceived::CreateSP(SharedThis(this), &SAIAssistantWindow::OnAIResponseReceived));
-        // 确认执行后进入请求中
-        bRequestInFlight = true;
-        UpdateRequestUI();
-    }
     return FReply::Handled();
 }
 
@@ -910,19 +842,6 @@ FReply SAIAssistantWindow::OnClearInputClicked()
     return FReply::Handled();
 }
 
-FReply SAIAssistantWindow::OnSwitchModelClicked()
-{
-    if (ModelOptions.Num() > 0)
-    {
-        CurrentModelIndex = (CurrentModelIndex + 1) % ModelOptions.Num();
-        if (SwitchModelLabel.IsValid())
-        {
-            SwitchModelLabel->SetText(FText::FromString(GetCurrentModelLabel()));
-        }
-    }
-    return FReply::Handled();
-}
-
 FReply SAIAssistantWindow::OnCancelClicked()
 {
     const bool bStreaming = IsStreamingActive();
@@ -1122,23 +1041,12 @@ void SAIAssistantWindow::TriggerRetry()
     // 增加尝试计数
     RetryAttempt = RetryAttempt + 1;
 
-    // 读取设置决定是否DryRun
-    USmartUEAssistantSettings* Settings = GetMutableDefault<USmartUEAssistantSettings>();
-    const bool bAutoExecuteSafeTools = Settings ? Settings->bAutoExecuteSafeTools : true;
-
-    const bool bEnableTools = true;
-    const bool bDryRun = !bAutoExecuteSafeTools;
-    const bool bUserConfirmed = false;
-
     bRequestInFlight = true;
     UpdateRequestUI();
 
-    FAIService::Get().SendMessageWithTools(
+    FAIService::Get().SendMessage(
         LastSentUserMessage,
-        FOnAIMessageReceived::CreateSP(SharedThis(this), &SAIAssistantWindow::OnAIResponseReceived),
-        /*bEnableTools*/ bEnableTools,
-        /*bDryRun*/ bDryRun,
-        /*bUserConfirmed*/ bUserConfirmed
+        FOnAIMessageReceived::CreateSP(SharedThis(this), &SAIAssistantWindow::OnAIResponseReceived)
     );
 }
 

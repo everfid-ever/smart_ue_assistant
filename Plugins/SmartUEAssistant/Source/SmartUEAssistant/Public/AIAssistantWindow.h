@@ -45,8 +45,6 @@ private:
 	TSharedPtr<SButton> ScreenshotButton;                  // 截图按钮 / Screenshot button
 	TSharedPtr<SButton> CodeBlockButton;                   // 代码块按钮 / Code block button
 	TSharedPtr<SButton> ClearInputButton;                  // 清除输入按钮 / Clear input button
-	TSharedPtr<SButton> SwitchModelButton;                 // 切换模型按钮 / Switch model button
-	TSharedPtr<STextBlock> SwitchModelLabel;               // 可动态更新的按钮文本 / Dynamically updatable button text
 	//TSharedPtr<SCheckBox> AttachSceneContextCheck;       // 移除：是否附带场景上下文 / Removed: attach scene context checkbox
 	TSharedPtr<SButton> InsertSceneSummaryButton;          // 逻辑保留但UI不呈现 / Logic retained but UI hidden
 
@@ -66,7 +64,6 @@ private:
 	FReply OnScreenshotClicked();
 	FReply OnCodeBlockClicked();
 	FReply OnClearInputClicked();
-	FReply OnSwitchModelClicked();
 	FReply OnInputKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent);
 	FReply OnInsertSceneSummaryClicked(); // 不再呈现按钮
 	FReply OnConfirmExecute();            // 新增：补齐声明
@@ -135,11 +132,6 @@ private:
 	int32 StreamingIndex = 0;
 	TSharedPtr<FActiveTimerHandle> StreamingTimerHandle; // 修正：改为 TSharedPtr 以支持 ToSharedRef()
 	float StreamingInterval = 0.03f;
-
-	// 模型切换
-	TArray<FString> ModelOptions { TEXT("GPT-4.1"), TEXT("GPT-4o"), TEXT("GPT-5") };
-	int32 CurrentModelIndex = 2; // 默认 GPT-5
-	FString GetCurrentModelLabel() const { return ModelOptions.IsValidIndex(CurrentModelIndex) ? ModelOptions[CurrentModelIndex] : TEXT("默认模型"); }
 
 	// 新增：抑制内部触发的取消/超时提示（例如发送新消息前主动取消上一个请求）
 	bool bSuppressCancelNotice = false;

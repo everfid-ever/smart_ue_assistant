@@ -7,50 +7,21 @@
 #include "SmartUEAssistantSettings.generated.h"
 
 /**
- * xAssistant 插件设置
- * Plugin settings for xAssistant
- * 
- * 配置 AI 服务连接、行为和功能开关。
+ * SmartUEAssistant 插件设置
  * 设置存储在 Config/DefaultSmartUEAssistant.ini
- * 
- * Configures AI service connection, behavior, and feature toggles.
- * Settings are stored in Config/DefaultSmartUEAssistant.ini
  */
 UCLASS(Config=SmartUEAssistant, DefaultConfig)
 class SMARTUEASSISTANT_API USmartUEAssistantSettings : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 	USmartUEAssistantSettings();
-	
-	/** API endpoint URL (deprecated, use BaseURL instead) */
-	UPROPERTY(Config, EditAnywhere, Category="AI Settings", meta=(Tooltip="Legacy API endpoint configuration"))
-	FString APIEndpoint;
 
-	/** Base URL for OpenAI-compatible API endpoints (e.g., DeepSeek) */
-	UPROPERTY(Config, EditAnywhere, Category="AI Settings", meta=(Tooltip="Base URL for API requests"))
-	FString BaseURL;
-	
-	/** API authentication key */
-	UPROPERTY(Config, EditAnywhere, Category="AI Settings", meta=(Tooltip="Your API key for authentication"))
-	FString APIKey;
-	
-	/** Comma-separated list of supported model names */
-	UPROPERTY(Config, EditAnywhere, Category="AI Settings", meta=(Tooltip="Available AI models"))
-	FString SupportedModels;
-	
-	/** Request timeout in seconds */
-	UPROPERTY(Config, EditAnywhere, Category="AI Settings", meta=(ClampMin="1", ClampMax="300", Tooltip="Timeout for API requests in seconds"))
-	int32 RequestTimeout;
-	
-	/** Maximum number of tokens in AI response */
-	UPROPERTY(Config, EditAnywhere, Category="AI Settings", meta=(ClampMin="1", ClampMax="4000", Tooltip="Max tokens in response"))
-	int32 MaxTokens;
-	
-	/** Temperature parameter for AI response randomness (0.0 = deterministic, 2.0 = very random) */
-	UPROPERTY(Config, EditAnywhere, Category="AI Settings", meta=(ClampMin="0.0", ClampMax="2.0", Tooltip="Response randomness (0=deterministic, 2=creative)"))
-	float Temperature;
+	/** 本地 Python MCP HTTP Server 地址 */
+	UPROPERTY(Config, EditAnywhere, Category="MCP Server",
+		meta=(Tooltip="本地 Python MCP HTTP Server 地址，默认 http://127.0.0.1:8765"))
+	FString MCPServerURL = TEXT("http://127.0.0.1:8765");
 
 	/** Automatically attach scene summary when sending messages in editor */
 	UPROPERTY(EditAnywhere, Config, Category="AI", meta=(Tooltip="Include scene context in AI queries"))
@@ -68,10 +39,6 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category="AI", meta=(Tooltip="Include component summary"))
 	bool bIncludeComponentSummary = true;
 
-	/** Automatically execute safe tools without confirmation (Permission=Safe && !bRequireConfirm) */
-	UPROPERTY(EditAnywhere, Config, Category="AI", meta=(Tooltip="Auto-execute safe operations"))
-	bool bAutoExecuteSafeTools = true;
-
 	/** Allow empty Enter key to confirm pending dangerous operations */
 	UPROPERTY(EditAnywhere, Config, Category="Confirm", meta=(Tooltip="Press Enter to confirm pending operations"))
 	bool bEnterAcceptsPending = true;
@@ -83,10 +50,6 @@ public:
 	/** Comma-separated keywords that cancel pending operations */
 	UPROPERTY(EditAnywhere, Config, Category="Confirm", meta=(Tooltip="Keywords to cancel (comma-separated)"))
 	FString ConfirmCancelKeywords = TEXT("取消,放弃,中止,no");
-
-	/** Skip confirmation for console commands (HIGH RISK - enable with caution) */
-	UPROPERTY(EditAnywhere, Config, Category="Confirm", meta=(Tooltip="WARNING: Skips confirmation for console commands"))
-	bool bSkipConfirmForConsoleCommands = false;
 
 	/** Enable conversation memory to maintain context across messages */
 	UPROPERTY(EditAnywhere, Config, Category="AI|Memory", meta=(Tooltip="Remember previous conversation"))
