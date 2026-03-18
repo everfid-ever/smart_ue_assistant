@@ -116,7 +116,7 @@ class CppIndexer:
             return False
 
         try:
-            content = cpp_file.read_text(encoding='utf-8', errors='ignore')
+            content = cpp_file.read_text(encoding='utf-8-sig', errors='replace')
             info = _extract_info(content)
             md = _to_markdown(str(cpp_file.relative_to(self.source_dir)), info)
 
@@ -140,7 +140,10 @@ class CppIndexer:
 
         files = [
             f for f in self.source_dir.rglob('*')
-            if f.suffix in extensions and f.is_file()
+            if f.suffix in extensions
+            and f.is_file()
+            and 'Intermediate' not in f.parts
+            and 'Binaries' not in f.parts
         ]
         self.stats['scanned'] = len(files)
         print(f"   找到 {len(files)} 个文件")

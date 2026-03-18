@@ -83,3 +83,4 @@ private_index:
   cpp_output_dir: ../docs/converted/cpp_source
   docs_output_dir: ../docs/converted/private_docs
   cache_file: ../docs/converted/.index_cache.json
+  assets_output_dir: ../docs/converted/assets

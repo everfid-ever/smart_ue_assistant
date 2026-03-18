@@ -165,6 +165,24 @@ async def query_assets(query: str, asset_type: str = None) -> str:
         import json
         return f"资产检索结果（查询：{query}）\n\n{json.dumps(result, indent=2, ensure_ascii=False)}"
     except Exception as e:
+        # 尝试查本地资产索引（离线模式）
+        assets_dir = _MCP_DIR / "docs" / "converted" / "assets"
+        if assets_dir.exists():
+            try:
+                spec = importlib.util.spec_from_file_location(
+                    "simple_rag_query", _SIMPLE_RAG
+                )
+                mod = importlib.util.module_from_spec(spec)
+                spec.loader.exec_module(mod)
+                client = mod.SimpleRAGClient(docs_dir=str(assets_dir))
+                results = client.search(query, max_results=5)
+                if results:
+                    lines = [f"（离线模式）找到 {len(results)} 条本地资产记录\n"]
+                    for i, r in enumerate(results, 1):
+                        lines.append(f"[{i}] {r['name']}  (相关度: {r['score']})")
+                    return "\n".join(lines)
+            except Exception:
+                pass
         return (
             f"❌ 资产检索失败：{e}\n"
             f"请确认 UE Editor 正在运行，且 Output Log 显示 TCP server listening on :55557"
