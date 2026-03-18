@@ -4,6 +4,8 @@
 
 #include "Commands/UACommandBase.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogUABlueprint, Log, All);
+
 /**
  * 蓝图编辑命令组 — 镜像 UAMaterialCommands 的设计模式。
  * 提供蓝图节点图的查询、节点创建/删除、引脚连接/断开、变量/函数管理、编译等功能。

@@ -22,7 +22,7 @@
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Kismet2/CompilerResultsLog.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogUABlueprint, Log, All);
+DEFINE_LOG_CATEGORY(LogUABlueprint);
 
 // ==================== Schema Helpers ====================
 

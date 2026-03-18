@@ -145,33 +145,33 @@ bool FUAPropertyModificationHelper::SetPropertyValueDirect(
 
 	void* ValuePtr = Property->ContainerPtrToValuePtr<void>(ContainerPtr);
 
-	if (FFloatProperty* P = CastField<FFloatProperty>(Property))
+	if (FFloatProperty* FloatP = CastField<FFloatProperty>(Property))
 	{
-		if (Value->Type == EJson::Number) { P->SetPropertyValue(ValuePtr, (float)Value->AsNumber()); return true; }
+		if (Value->Type == EJson::Number) { FloatP->SetPropertyValue(ValuePtr, (float)Value->AsNumber()); return true; }
 	}
-	else if (FDoubleProperty* P = CastField<FDoubleProperty>(Property))
+	else if (FDoubleProperty* DoubleP = CastField<FDoubleProperty>(Property))
 	{
-		if (Value->Type == EJson::Number) { P->SetPropertyValue(ValuePtr, Value->AsNumber()); return true; }
+		if (Value->Type == EJson::Number) { DoubleP->SetPropertyValue(ValuePtr, Value->AsNumber()); return true; }
 	}
-	else if (FIntProperty* P = CastField<FIntProperty>(Property))
+	else if (FIntProperty* IntP = CastField<FIntProperty>(Property))
 	{
-		if (Value->Type == EJson::Number) { P->SetPropertyValue(ValuePtr, (int32)Value->AsNumber()); return true; }
+		if (Value->Type == EJson::Number) { IntP->SetPropertyValue(ValuePtr, (int32)Value->AsNumber()); return true; }
 	}
-	else if (FBoolProperty* P = CastField<FBoolProperty>(Property))
+	else if (FBoolProperty* BoolP = CastField<FBoolProperty>(Property))
 	{
-		if (Value->Type == EJson::Boolean) { P->SetPropertyValue(ValuePtr, Value->AsBool()); return true; }
+		if (Value->Type == EJson::Boolean) { BoolP->SetPropertyValue(ValuePtr, Value->AsBool()); return true; }
 	}
-	else if (FStrProperty* P = CastField<FStrProperty>(Property))
+	else if (FStrProperty* StrP = CastField<FStrProperty>(Property))
 	{
-		if (Value->Type == EJson::String) { P->SetPropertyValue(ValuePtr, Value->AsString()); return true; }
+		if (Value->Type == EJson::String) { StrP->SetPropertyValue(ValuePtr, Value->AsString()); return true; }
 	}
-	else if (FNameProperty* P = CastField<FNameProperty>(Property))
+	else if (FNameProperty* NameP = CastField<FNameProperty>(Property))
 	{
-		if (Value->Type == EJson::String) { P->SetPropertyValue(ValuePtr, FName(*Value->AsString())); return true; }
+		if (Value->Type == EJson::String) { NameP->SetPropertyValue(ValuePtr, FName(*Value->AsString())); return true; }
 	}
-	else if (FTextProperty* P = CastField<FTextProperty>(Property))
+	else if (FTextProperty* TextP = CastField<FTextProperty>(Property))
 	{
-		if (Value->Type == EJson::String) { P->SetPropertyValue(ValuePtr, FText::FromString(Value->AsString())); return true; }
+		if (Value->Type == EJson::String) { TextP->SetPropertyValue(ValuePtr, FText::FromString(Value->AsString())); return true; }
 	}
 	else if (FStructProperty* StructProp = CastField<FStructProperty>(Property))
 	{

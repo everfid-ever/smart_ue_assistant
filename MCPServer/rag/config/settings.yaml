@@ -76,3 +76,10 @@ agents:
       - guides
     temperature: 0.3
 
+# 私有索引路径（Phase 5）
+private_index:
+  project_source_path: D:/ue-ai/smart_ue_assistant/Plugins
+  private_docs_path: D:/ue-ai/smart_ue_assistant/Docs
+  cpp_output_dir: ../docs/converted/cpp_source
+  docs_output_dir: ../docs/converted/private_docs
+  cache_file: ../docs/converted/.index_cache.json

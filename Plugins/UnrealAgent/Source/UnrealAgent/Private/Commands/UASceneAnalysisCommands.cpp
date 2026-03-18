@@ -253,7 +253,7 @@ bool UASceneAnalysisCommands::ValidateLevel(
 
 		if (ALight* LA = Cast<ALight>(Actor))
 			if (ULightComponent* LC = LA->GetLightComponent())
-				if (!LC->CastShadow)
+				if (!LC->CastShadows)
 					Issues.Add(FString::Printf(TEXT("[No Shadows] %s"), *Actor->GetActorLabel()));
 
 		FVector Loc = Actor->GetActorLocation();

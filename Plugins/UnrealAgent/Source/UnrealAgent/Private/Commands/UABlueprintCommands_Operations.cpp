@@ -26,8 +26,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogUABlueprint, Log, All);
-
 // ==================== add_node ====================
 
 bool UABlueprintCommands::ExecuteAddNode(

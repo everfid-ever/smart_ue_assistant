@@ -96,19 +96,53 @@ async def query_docs(query: str, max_results: int = 5) -> str:
 @mcp.tool()
 async def query_code(query: str, max_results: int = 5) -> str:
     """
-    查询项目本地 C++ 源码索引（Phase 5 功能，当前尚未启用）。
-    当前建议使用 execute_python 在编辑器内直接查询。
+    查询项目本地 C++ 源码索引（UnrealAgent + SmartUEAssistant 插件）。
+    适用于：查找类定义、函数实现位置、注释说明等。
 
     Args:
-        query: 查询内容，例如 "UABlueprintCommands 如何注册工具"
-        max_results: 返回结果数量
+        query: 查询内容，例如 "UABatchOperationCommands 批量重命名"
+        max_results: 返回结果数量，默认 5
     """
-    return (
-        f"🚧 本地代码索引功能尚未启用（Phase 5）\n\n"
-        f"查询：{query}\n\n"
-        f"当前替代方案：使用 execute_python 工具在 UE 编辑器内直接执行 Python 查询\n"
-        f"例如：import unreal; print(dir(unreal.Actor))"
-    )
+    cpp_docs_dir = _MCP_DIR / "docs" / "converted" / "cpp_source"
+
+    if not cpp_docs_dir.exists():
+        return (
+            "🚧 C++ 源码索引尚未构建。\n\n"
+            "请先运行：\n"
+            "  cd MCPServer/rag/indexers\n"
+            "  python cpp_indexer.py\n\n"
+            f"索引将输出到：{cpp_docs_dir}"
+        )
+
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "simple_rag_query", _SIMPLE_RAG
+        )
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        client = mod.SimpleRAGClient(docs_dir=str(cpp_docs_dir))
+
+        results = client.search(query, max_results=min(max_results, 10))
+
+        if not results:
+            return (
+                f"未找到与「{query}」相关的 C++ 代码。\n"
+                f"建议：使用英文类名或函数名搜索，例如 'UABatchOperationCommands'"
+            )
+
+        lines = [f"找到 {len(results)} 条相关代码（查询：{query}）\n"]
+        for i, r in enumerate(results, 1):
+            lines.append(f"[{i}] {r['name']}  (相关度: {r['score']})")
+            snippets = r.get("snippets", [])
+            if snippets:
+                snippet = snippets[0].strip().replace("\n", " ")[:400]
+                lines.append(f"    {snippet}...")
+            lines.append("")
+
+        return "\n".join(lines)
+
+    except Exception as e:
+        return f"❌ 查询出错：{e}"
 
 
 @mcp.tool()
