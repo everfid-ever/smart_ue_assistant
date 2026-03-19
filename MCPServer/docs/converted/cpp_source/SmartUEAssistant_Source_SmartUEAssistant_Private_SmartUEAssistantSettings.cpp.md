@@ -1,1 +1,0 @@
-# SmartUEAssistant\Source\SmartUEAssistant\Private\SmartUEAssistantSettings.cpp

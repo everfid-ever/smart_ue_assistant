@@ -83,7 +83,7 @@ __pycache__/
 
 # 环境配置（含 API Key，不能提交）
 .env
-MCPServer/.env
+server/.env
 
 # Python 虚拟环境
 .venv/
@@ -91,7 +91,16 @@ venv/
 env/
 
 # 测试临时文件
-MCPServer/test_rag.py
-MCPServer/rag/docs/raw/
+server/test_rag.py
+server/rag/docs/raw/
 
 .idea/
+
+# 知识库生成文件（本地生成，不入库）
+knowledge/cpp_source/converted/
+knowledge/ue_docs/converted/
+knowledge/index_cache/
+knowledge/project_assets/
+
+# 原始文档保留入库
+# knowledge/ue_docs/raw/ 不排除
