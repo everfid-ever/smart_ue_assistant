@@ -9,7 +9,6 @@
 #include "Widgets/SWindow.h"
 #include "EditorAIToolRegistry.h"
 // Include all built-in tools
-#include "BuiltInEditorTools.h"
 #include "ISettingsModule.h"
 #include "SmartUEAssistantSettings.h"
 #include "LevelEditor.h"
