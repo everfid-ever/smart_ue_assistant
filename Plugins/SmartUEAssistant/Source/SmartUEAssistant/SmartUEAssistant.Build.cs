@@ -36,6 +36,7 @@ public class SmartUEAssistant : ModuleRules
 					"Projects",
 					"LevelEditor",
 					"Settings" // 新增：用于注册项目设置页
+					"UnrealAgent"
 				}
 			);
 		}
